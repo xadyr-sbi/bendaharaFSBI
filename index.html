@@ -433,6 +433,23 @@
             gap: 10px;
         }
         
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--light-gray);
+        }
+        
+        .empty-state p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .tabs {
@@ -635,8 +652,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    transactions = data.data;
-                    updateSummaryCards(data.totals);
+                    transactions = data.data || [];
+                    updateSummaryCards(data.totals || { pemasukan: 0, pengeluaran: 0, saldo: 0 });
                     updateTransactionTable();
                     updateCharts();
                     showNotification('Data berhasil dimuat', 'success');
@@ -647,34 +664,14 @@
                 console.error('Error:', error);
                 showNotification('Gagal memuat data: ' + error.message, 'error');
                 
-                // Fallback data untuk demo jika endpoint tidak bisa diakses
-                loadDemoData();
+                // Mulai tanpa data
+                transactions = [];
+                updateSummaryCards({ pemasukan: 0, pengeluaran: 0, saldo: 0 });
+                updateTransactionTable();
+                updateCharts();
             } finally {
                 hideLoading();
             }
-        }
-        
-        function loadDemoData() {
-            // Data demo jika tidak dapat mengakses endpoint
-            transactions = [
-                { id: 1, tanggal: '2025-03-15', keterangan: 'Gaji Bulanan', debit: '2500000', kredit: '', saldo: '2500000', keterangan2: 'Gaji Maret' },
-                { id: 2, tanggal: '2025-03-16', keterangan: 'Bayar Listrik', debit: '', kredit: '750000', saldo: '1750000', keterangan2: 'PLN' },
-                { id: 3, tanggal: '2025-03-18', keterangan: 'Freelance Project', debit: '2750000', kredit: '', saldo: '4500000', keterangan2: 'Project Website' },
-                { id: 4, tanggal: '2025-03-20', keterangan: 'Belanja Bulanan', debit: '', kredit: '1200000', saldo: '3300000', keterangan2: 'Supermarket' },
-                { id: 5, tanggal: '2025-03-22', keterangan: 'Bonus', debit: '1000000', kredit: '', saldo: '4300000', keterangan2: 'Bonus Kerja' },
-                { id: 6, tanggal: '2025-03-25', keterangan: 'Internet', debit: '', kredit: '425000', saldo: '3875000', keterangan2: 'Paket Data' },
-                { id: 7, tanggal: '2025-03-28', keterangan: 'Transportasi', debit: '', kredit: '800000', saldo: '3075000', keterangan2: 'Bensin dan Transport' }
-            ];
-            
-            const totals = {
-                pemasukan: 6250000,
-                pengeluaran: 3175000,
-                saldo: 3075000
-            };
-            
-            updateSummaryCards(totals);
-            updateTransactionTable();
-            updateCharts();
         }
         
         function updateSummaryCards(totals) {
@@ -688,7 +685,17 @@
             tbody.innerHTML = '';
             
             if (transactions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Tidak ada data transaksi</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                <p>Belum ada data transaksi</p>
+                                <p>Mulai dengan menambahkan transaksi pertama Anda</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
             
@@ -901,9 +908,9 @@
             
             // Update line chart
             if (window.monthlyTrendChart) {
-                // Data contoh untuk grafik trend bulanan
-                window.monthlyTrendChart.data.datasets[0].data = [4000000, 4500000, 5250000, 4800000, 5100000, 5500000];
-                window.monthlyTrendChart.data.datasets[1].data = [2800000, 3000000, 3175000, 3300000, 2950000, 3100000];
+                // Data kosong untuk grafik trend bulanan
+                window.monthlyTrendChart.data.datasets[0].data = [0, 0, 0, 0, 0, 0];
+                window.monthlyTrendChart.data.datasets[1].data = [0, 0, 0, 0, 0, 0];
                 window.monthlyTrendChart.update();
             }
         }
