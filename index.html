@@ -1,118 +1,162 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bendahara Terintegrasi</title>
-<style>
-  body { font-family: Arial, sans-serif; margin:20px; }
-  table { width:100%; border-collapse: collapse; margin-top:20px; }
-  th, td { border:1px solid #ccc; padding:8px; text-align:center; }
-  th { background:#f2f2f2; }
-  input, select, button { padding:5px; margin:3px; }
-</style>
-</head>
-<body>
-
-<h2>Bendahara Terintegrasi</h2>
-
-<div>
-  <label>Tanggal: <input type="date" id="tanggal"></label>
-  <label>Keterangan: 
-    <select id="keterangan">
-      <option value="Pemasukan">Pemasukan</option>
-      <option value="Pengeluaran">Pengeluaran</option>
-    </select>
-  </label>
-  <label>Jumlah: <input type="number" id="jumlah" min="0"></label>
-  <label>Keterangan Tambahan: <input type="text" id="keterangan2"></label>
-  <button onclick="tambahTransaksi()">Tambah</button>
-</div>
-
-<table id="tabel">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Tanggal</th>
-      <th>Keterangan</th>
-      <th>Debit</th>
-      <th>Kredit</th>
-      <th>Saldo</th>
-      <th>Keterangan Tambahan</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<p>Total Pemasukan: <span id="totalPemasukan">0</span></p>
-<p>Total Pengeluaran: <span id="totalPengeluaran">0</span></p>
-<p>Saldo Akhir: <span id="saldoAkhir">0</span></p>
-
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxzptBZECDM3ilyR6iTs3UNzMDU5gkoni26g_kkJ8N5mgnjcZRgG0MUU8kAvnkbIT61Gg/exec";
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzptBZECDM3ilyR6iTs3UNzMDU5gkoni26g_kkJ8N5mgnjcZRgG0MUU8kAvnkbIT61Gg/exec';
+    let transactions = [];
 
-async function fetchData() {
-  const res = await fetch(API_URL);
-  const json = await res.json();
-  if(json.success){
-    renderTable(json.data);
-    document.getElementById('totalPemasukan').innerText = json.totals.pemasukan;
-    document.getElementById('totalPengeluaran').innerText = json.totals.pengeluaran;
-    document.getElementById('saldoAkhir').innerText = json.totals.saldo;
-  } else {
-    alert("Gagal mengambil data: " + json.message);
-  }
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().substr(0, 10);
+        document.getElementById('tanggal').value = today;
+        setupTabs();
+        document.getElementById('transaction-form').addEventListener('submit', handleFormSubmit);
+        loadData();
+        initCharts();
+    });
 
-function renderTable(rows){
-  const tbody = document.querySelector("#tabel tbody");
-  tbody.innerHTML = "";
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.id}</td>
-      <td>${r.tanggal}</td>
-      <td>${r.keterangan}</td>
-      <td>${r.debit}</td>
-      <td>${r.kredit}</td>
-      <td>${r.saldo}</td>
-      <td>${r.keterangan2}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+    function setupTabs() {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                if(tab.dataset.tab === 'charts') updateCharts();
+                else if(tab.dataset.tab === 'data') loadData();
+            });
+        });
+    }
 
-async function tambahTransaksi(){
-  const tanggal = document.getElementById('tanggal').value;
-  const keterangan = document.getElementById('keterangan').value;
-  const jumlah = document.getElementById('jumlah').value;
-  const keterangan2 = document.getElementById('keterangan2').value;
+    async function loadData() {
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            const headers = data.headers;
+            const rows = data.rows;
+            transactions = rows.map((row, index) => ({
+                id: index,
+                tanggal: row[0],
+                keterangan: row[1],
+                debit: row[2],
+                kredit: row[3],
+                saldo: row[4],
+                keterangan2: row[5]
+            }));
 
-  if(!tanggal || !jumlah){
-    alert("Tanggal dan jumlah wajib diisi!");
-    return;
-  }
+            const totalPemasukan = transactions.reduce((sum, t) => sum + (t.keterangan === 'Pemasukan' ? t.debit : 0), 0);
+            const totalPengeluaran = transactions.reduce((sum, t) => sum + (t.keterangan === 'Pengeluaran' ? t.kredit : 0), 0);
+            const saldoSekarang = transactions.length ? transactions[transactions.length-1].saldo : 0;
 
-  const params = new URLSearchParams({tanggal,keterangan,jumlah,keterangan2});
-  
-  const res = await fetch(API_URL + "?" + params.toString(), {
-    method: "POST"
-  });
-  const json = await res.json();
-  if(json.success){
-    alert("Transaksi berhasil ditambahkan!");
-    document.getElementById('tanggal').value = "";
-    document.getElementById('jumlah').value = "";
-    document.getElementById('keterangan2').value = "";
-    fetchData();
-  } else {
-    alert("Gagal menambahkan: " + json.message);
-  }
-}
+            updateSummaryCards({pemasukan: totalPemasukan, pengeluaran: totalPengeluaran, saldo: saldoSekarang});
+            updateTransactionTable();
+            updateCharts();
+        } catch(err) {
+            console.error(err);
+            showNotification('Gagal memuat data', 'error');
+        }
+    }
 
-// Load data pertama kali
-fetchData();
+    function updateSummaryCards(totals) {
+        document.getElementById('total-pemasukan').textContent = formatRupiah(totals.pemasukan);
+        document.getElementById('total-pengeluaran').textContent = formatRupiah(totals.pengeluaran);
+        document.getElementById('saldo-sekarang').textContent = formatRupiah(totals.saldo);
+    }
+
+    function updateTransactionTable() {
+        const tbody = document.getElementById('transactions-body');
+        tbody.innerHTML = '';
+        if(transactions.length === 0){
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>Belum ada data transaksi</p></td></tr>`;
+            return;
+        }
+        transactions.forEach(t => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${formatDate(t.tanggal)}</td>
+                <td>${t.keterangan}</td>
+                <td class="debit">${t.keterangan === 'Pemasukan' ? formatRupiah(t.debit) : ''}</td>
+                <td class="kredit">${t.keterangan === 'Pengeluaran' ? formatRupiah(t.kredit) : ''}</td>
+                <td>${formatRupiah(t.saldo)}</td>
+                <td>${t.keterangan2 || ''}</td>
+                <td>-</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function handleFormSubmit(e){
+        e.preventDefault();
+        const tanggal = document.getElementById('tanggal').value;
+        const keterangan = document.getElementById('keterangan').value;
+        const jumlah = document.getElementById('jumlah').value || 0;
+        const keterangan2 = document.getElementById('keterangan2').value;
+
+        if(!keterangan) return showNotification('Pilih jenis transaksi terlebih dahulu', 'error');
+
+        const payload = {
+            tanggal: tanggal,
+            keterangan: keterangan,
+            debit: keterangan==='Pemasukan'? jumlah : 0,
+            kredit: keterangan==='Pengeluaran'? jumlah : 0,
+            ket2: keterangan2
+        };
+
+        try {
+            showLoading();
+            const formData = new URLSearchParams(payload);
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            showNotification(result.message || 'Transaksi berhasil ditambahkan', 'success');
+            document.getElementById('transaction-form').reset();
+            document.getElementById('tanggal').value = new Date().toISOString().substr(0, 10);
+            loadData();
+        } catch(err){
+            console.error(err);
+            showNotification('Gagal menambahkan transaksi', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function formatRupiah(amount){
+        return 'Rp ' + parseInt(amount || 0).toLocaleString('id-ID');
+    }
+
+    function formatDate(dateStr){
+        return new Date(dateStr).toLocaleDateString('id-ID');
+    }
+
+    function showNotification(message, type){
+        const notif = document.getElementById('notification');
+        const msg = document.getElementById('notification-message');
+        notif.className = 'notification ' + type + ' show';
+        msg.textContent = message;
+        setTimeout(()=> notif.classList.remove('show'), 3000);
+    }
+
+    function showLoading(){
+        document.querySelectorAll('button').forEach(btn=>{
+            btn.disabled=true;
+            if(btn.type==='submit'){
+                btn.setAttribute('data-original', btn.innerHTML);
+                btn.innerHTML='<span class="loader"></span> Memproses...';
+            }
+        });
+    }
+
+    function hideLoading(){
+        document.querySelectorAll('button').forEach(btn=>{
+            btn.disabled=false;
+            const original = btn.getAttribute('data-original');
+            if(original) btn.innerHTML=original;
+        });
+    }
+
+    function initCharts(){
+        // Charts tetap seperti sebelumnya, bisa pakai data dummy awal
+    }
+
+    function updateCharts(){
+        // Update chart pakai data transactions
+    }
 </script>
-
-</body>
-</html>
