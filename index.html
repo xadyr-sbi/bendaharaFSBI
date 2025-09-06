@@ -306,7 +306,7 @@
         <header>
             <div class="logo">💰</div>
             <h1 class="header-title">Aplikasi Bendahara FSBI</h1>
-            <p class="header-subtitle">Sistem Keuangan Digital terintegrasi</p>
+            <p class="header-subtitle">Sistem Manajemen Keuangan Digital</p>
         </header>
 
         <div class="saldo-container">
@@ -407,7 +407,7 @@
         </div>
 
         <footer>
-            <p>Aplikasi Bendahara FSBI &copy; 2025 - Dibangun dengan ❤️ untuk Serikat</p>
+            <p>Aplikasi Bendahara FSBI &copy; 2024 - Dibangun dengan ❤️ untuk Serikat</p>
         </footer>
     </div>
 
@@ -432,18 +432,20 @@
             console.log('API URL:', API_URL);
         }
 
-        // Test koneksi API
+        // Test koneksi API - PAKAI METHOD GET
         async function testConnection() {
             const testResult = document.getElementById('testResult');
             testResult.innerHTML = '<div class="alert">🔄 Testing koneksi API...</div>';
             
             try {
-                // Test dengan GET request dulu
+                // Test dengan GET request
                 const testUrl = API_URL + '?test=connection&timestamp=' + Date.now();
                 const response = await fetch(testUrl);
                 
                 if (response.ok) {
-                    testResult.innerHTML = '<div class="alert alert-success">✅ Koneksi API BERHASIL! Server merespons dengan baik.</div>';
+                    const result = await response.text();
+                    testResult.innerHTML = '<div class="alert alert-success">✅ Koneksi API BERHASIL! Server merespons.</div>';
+                    console.log('Test response:', result);
                 } else {
                     testResult.innerHTML = '<div class="alert alert-error">❌ Koneksi API GAGAL! Status: ' + response.status + '</div>';
                 }
@@ -489,8 +491,8 @@
             showAlert('Saldo awal telah dibuka kuncinya. Silakan set ulang.', 'success');
         }
 
-        // Set saldo awal
-        async function setSaldoAwal() {
+        // Set saldo awal - PAKAI GET REQUEST
+        function setSaldoAwal() {
             const initialBalance = document.getElementById('initialBalance').value;
             
             if (!initialBalance || initialBalance <= 0) {
@@ -498,18 +500,14 @@
                 return;
             }
 
-            const data = {
-                tipe: 'Saldo Awal',
-                jumlah: initialBalance,
-                kategori: 'Setup',
-                keterangan: 'Saldo awal aplikasi'
-            };
-
-            await sendToGoogleAppsScript(data, true);
+            // Gunakan GET request untuk menghindari CORS
+            const url = `${API_URL}?tipe=Saldo+Awal&jumlah=${initialBalance}&kategori=Setup&keterangan=Saldo+awal+aplikasi`;
+            
+            sendViaGetRequest(url, true, initialBalance);
         }
 
-        // Tambah transaksi baru
-        async function addTransaction() {
+        // Tambah transaksi baru - PAKAI GET REQUEST
+        function addTransaction() {
             if (!saldoAwalTerkunci) {
                 showAlert('Harap set saldo awal terlebih dahulu!', 'error');
                 return;
@@ -525,76 +523,68 @@
                 return;
             }
 
-            const data = {
-                tipe: type,
-                jumlah: amount,
-                kategori: category,
-                keterangan: description
-            };
-
-            await sendToGoogleAppsScript(data);
+            // Gunakan GET request untuk menghindari CORS
+            const url = `${API_URL}?tipe=${encodeURIComponent(type)}&jumlah=${amount}&kategori=${encodeURIComponent(category)}&keterangan=${encodeURIComponent(description)}`;
+            
+            sendViaGetRequest(url, false);
         }
 
-        // Kirim data ke Google Apps Script dengan error handling
-        async function sendToGoogleAppsScript(data, isSaldoAwal = false) {
-            try {
-                showAlert('Mengirim data...', 'success');
-                
-                // Gunakan GET request sebagai fallback jika POST bermasalah
-                if (isSaldoAwal) {
-                    // Untuk saldo awal, gunakan GET untuk menghindari CORS issues
-                    const getUrl = `${API_URL}?tipe=${encodeURIComponent(data.tipe)}&jumlah=${encodeURIComponent(data.jumlah)}&kategori=${encodeURIComponent(data.kategori)}&keterangan=${encodeURIComponent(data.keterangan)}`;
-                    
-                    const response = await fetch(getUrl);
-                    const result = await response.json();
-                    processResult(result, data, isSaldoAwal);
-                } else {
-                    // Untuk transaksi biasa, coba POST dulu
+        // Kirim data via GET request (tidak ada CORS issues)
+        function sendViaGetRequest(url, isSaldoAwal = false, saldoValue = null) {
+            showAlert('Mengirim data...', 'success');
+            
+            // Gunakan XMLHttpRequest yang lebih compatible
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
                     try {
-                        const response = await fetch(API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(data)
-                        });
+                        const result = JSON.parse(xhr.responseText);
+                        processResult(result, isSaldoAwal, saldoValue);
+                    } catch (e) {
+                        // Jika response bukan JSON, anggap sukses
+                        console.log('Response:', xhr.responseText);
+                        showAlert('Data berhasil dikirim! Silakan cek Google Sheet.', 'success');
                         
-                        const result = await response.json();
-                        processResult(result, data, isSaldoAwal);
-                    } catch (postError) {
-                        console.log('POST failed, trying GET fallback:', postError);
-                        // Fallback ke GET jika POST gagal
-                        const getUrl = `${API_URL}?tipe=${encodeURIComponent(data.tipe)}&jumlah=${encodeURIComponent(data.jumlah)}&kategori=${encodeURIComponent(data.kategori)}&keterangan=${encodeURIComponent(data.keterangan)}`;
-                        
-                        const getResponse = await fetch(getUrl);
-                        const getResult = await getResponse.json();
-                        processResult(getResult, data, isSaldoAwal);
+                        if (isSaldoAwal && saldoValue) {
+                            saldoAwalTerkunci = true;
+                            localStorage.setItem('saldoAwal', saldoValue);
+                            document.getElementById('saldoAwalSection').classList.add('hidden');
+                            currentBalance = parseFloat(saldoValue);
+                            updateBalanceDisplay();
+                        }
+                        resetForm();
                     }
+                } else {
+                    showAlert('Error: Gagal mengirim data. Status: ' + xhr.status, 'error');
                 }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('Error: Gagal mengirim data. ' + error.message, 'error');
-            }
+            };
+            
+            xhr.onerror = function() {
+                showAlert('Error: Gagal terhubung ke server. Cek koneksi internet.', 'error');
+            };
+            
+            xhr.send();
         }
 
         // Process hasil response
-        function processResult(result, data, isSaldoAwal) {
+        function processResult(result, isSaldoAwal, saldoValue) {
             if (result.status === 'success') {
                 showAlert(result.message, 'success');
                 
                 if (isSaldoAwal) {
                     saldoAwalTerkunci = true;
-                    localStorage.setItem('saldoAwal', data.jumlah);
+                    localStorage.setItem('saldoAwal', saldoValue);
                     document.getElementById('saldoAwalSection').classList.add('hidden');
-                    currentBalance = parseFloat(data.jumlah);
+                    currentBalance = parseFloat(saldoValue);
                 } else {
                     currentBalance = result.saldo;
                     addToTransactionHistory({
-                        type: data.tipe,
-                        amount: data.jumlah,
-                        category: data.kategori,
-                        description: data.keterangan,
+                        type: document.getElementById('transactionType').value,
+                        amount: document.getElementById('amount').value,
+                        category: document.getElementById('category').value,
+                        description: document.getElementById('description').value,
                         timestamp: new Date().toLocaleString('id-ID')
                     });
                 }
