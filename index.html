@@ -3,357 +3,956 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Bendahara FSBI</title>
+    <title>BENDAHARA FSBI APP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ff9e00;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --header-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+            padding-bottom: 40px;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
+            padding: 20px;
         }
         
         header {
-            background: #1a237e;
-            color: white;
-            padding: 25px;
             text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 0;
+            background: var(--bg-gradient);
+            color: white;
+            border-radius: 16px;
+            box-shadow: var(--header-shadow);
+            position: relative;
+            overflow: hidden;
         }
         
-        .header-title {
-            font-size: 2em;
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            background-size: cover;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
             margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
         
-        .saldo-container {
-            background: linear-gradient(135deg, #3949ab, #1a237e);
-            color: white;
-            padding: 25px;
-            text-align: center;
-            margin: 20px;
-            border-radius: 10px;
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            font-weight: 300;
         }
         
-        .saldo-amount {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 10px 0;
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
         }
         
-        .main-content {
-            padding: 25px;
+        @media (max-width: 968px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
         }
         
         .card {
-            background: #f9f9f9;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
         
         .card-title {
-            font-size: 1.3em;
-            color: #1a237e;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #3949ab;
-            padding-bottom: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--primary);
             font-weight: 600;
-            color: #1a237e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: all 0.3s;
+        .card-title i {
+            font-size: 1.5rem;
         }
         
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #3949ab;
-            box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.2);
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 35px;
         }
         
-        button {
-            background: linear-gradient(135deg, #3949ab, #1a237e);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: bold;
-            width: 100%;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
         }
         
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
             text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+        }
+        
+        .summary-card.income::before {
+            background: var(--success);
+        }
+        
+        .summary-card.expense::before {
+            background: var(--danger);
+        }
+        
+        .summary-card.balance::before {
+            background: var(--primary);
+        }
+        
+        .summary-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .summary-card.income i {
+            color: var(--success);
+        }
+        
+        .summary-card.expense i {
+            color: var(--danger);
+        }
+        
+        .summary-card.balance i {
+            color: var(--primary);
+        }
+        
+        .summary-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--gray);
             font-weight: 500;
         }
         
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .summary-card .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
         
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .income .amount {
+            color: var(--success);
         }
         
-        .api-info {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-            border-left: 4px solid #2196f3;
+        .expense .amount {
+            color: var(--danger);
         }
         
-        .transaction-history {
-            margin-top: 30px;
+        .balance .amount {
+            color: var(--primary);
         }
         
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid #eee;
+        .form-group {
+            margin-bottom: 20px;
         }
         
-        .history-item:last-child {
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e01b71;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(247, 37, 133, 0.3);
+        }
+        
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .transactions-table th,
+        .transactions-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .transactions-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .transactions-table tr:last-child td {
             border-bottom: none;
         }
         
-        .history-amount.income {
-            color: #2ecc71;
-            font-weight: bold;
+        .transactions-table tr:nth-child(even) {
+            background-color: #f9fafc;
         }
         
-        .history-amount.expense {
-            color: #e74c3c;
-            font-weight: bold;
+        .transactions-table tr:hover {
+            background-color: #f1f5ff;
+        }
+        
+        .debit {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .kredit {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 320px;
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            background: white;
+            border-radius: 12px;
+            padding: 5px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         footer {
             text-align: center;
-            padding: 20px;
-            color: #777;
-            border-top: 1px solid #eee;
-            margin-top: 20px;
+            margin-top: 40px;
+            padding: 25px;
+            color: var(--gray);
+            font-size: 0.95rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .transactions-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .summary-card .amount {
+                font-size: 1.7rem;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="header-title">💰 Aplikasi Bendahara FSBI</h1>
-            <p>Sistem Manajemen Keuangan Digital</p>
+            <h1>BENDAHARA FSBI APP</h1>
+            <p>Keuangan Digital Terintegrasi</p>
         </header>
-
-        <div class="saldo-container">
-            <div class="saldo-label">SALDO SAAT INI</div>
-            <div class="saldo-amount" id="currentBalance">Rp 300.000</div>
-            <div id="saldoStatus">Status: Aktif</div>
+        
+        <div class="summary-cards">
+            <div class="summary-card income">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>TOTAL PEMASUKAN</h3>
+                <div class="amount" id="total-pemasukan">Rp 0</div>
+            </div>
+            <div class="summary-card expense">
+                <i class="fas fa-share-square"></i>
+                <h3>TOTAL PENGELUARAN</h3>
+                <div class="amount" id="total-pengeluaran">Rp 0</div>
+            </div>
+            <div class="summary-card balance">
+                <i class="fas fa-wallet"></i>
+                <h3>SALDO SAAT INI</h3>
+                <div class="amount" id="saldo-sekarang">Rp 0</div>
+            </div>
         </div>
-
-        <div class="main-content">
-            <div class="api-info">
-                <strong>🔗 API URL:</strong> 
-                <span id="apiUrl">https://script.google.com/macros/s/AKfycbxpjOsTqibnlavINLE-WH8x2rkGj6JxlikuUzdNmrwUNxPK1TfoiPC1IOwnIHh7Jf8H/exec</span>
-                <br>
-                <strong>Status:</strong> <span id="apiStatus" style="color: green;">✅ ONLINE</span>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="form">
+                <i class="fas fa-plus-circle"></i>
+                <span>Tambah Transaksi</span>
             </div>
-
-            <div class="card">
-                <h2 class="card-title">💸 Transaksi Baru</h2>
-                <div id="alertBox"></div>
-                
-                <div class="form-group">
-                    <label for="transactionType">Jenis Transaksi:</label>
-                    <select id="transactionType">
-                        <option value="Pemasukan">Pemasukan</option>
-                        <option value="Pengeluaran">Pengeluaran</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="amount">Jumlah (Rp):</label>
-                    <input type="number" id="amount" placeholder="Masukkan jumlah" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label for="category">Kategori:</label>
-                    <select id="category">
-                        <option value="Iuran">Iuran Anggota</option>
-                        <option value="Donasi">Donasi</option>
-                        <option value="Proyek">Proyek</option>
-                        <option value="Sumbangan">Sumbangan</option>
-                        <option value="Operasional">Operasional</option>
-                        <option value="Acara">Acara</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Keterangan:</label>
-                    <textarea id="description" rows="3" placeholder="Deskripsi transaksi"></textarea>
-                </div>
-
-                <button onclick="addTransaction()">➕ Tambah Transaksi</button>
+            <div class="tab" data-tab="data">
+                <i class="fas fa-database"></i>
+                <span>Data Transaksi</span>
             </div>
-
+            <div class="tab" data-tab="charts">
+                <i class="fas fa-chart-pie"></i>
+                <span>Grafik</span>
+            </div>
+        </div>
+        
+        <div class="tab-content active" id="form-tab">
             <div class="card">
-                <h2 class="card-title">📋 Riwayat Transaksi</h2>
-                <div id="transactionHistory">
-                    <div class="history-item">
-                        <div>
-                            <strong>Pemasukan</strong>
-                            <div>Test - Test Manual</div>
-                            <small>Baru saja</small>
-                        </div>
-                        <div class="history-amount income">+ Rp 50.000</div>
+                <h2 class="card-title"><i class="fas fa-money-check-alt"></i> Tambah Transaksi Baru</h2>
+                <form id="transaction-form">
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal</label>
+                        <input type="date" id="tanggal" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jenis">Jenis Transaksi</label>
+                        <select id="jenis" class="form-control" required>
+                            <option value="">Pilih Jenis</option>
+                            <option value="Pemasukan">Pemasukan</option>
+                            <option value="Pengeluaran">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="keterangan">Keterangan</label>
+                        <input type="text" id="keterangan" class="form-control" placeholder="Masukkan keterangan transaksi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jumlah">Jumlah (Rp)</label>
+                        <input type="number" id="jumlah" class="form-control" placeholder="Masukkan jumlah" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="keterangan2">Keterangan Tambahan</label>
+                        <textarea id="keterangan2" class="form-control" placeholder="Keterangan tambahan (opsional)"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span>Simpan Transaksi</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="data-tab">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-table"></i> Data Transaksi</h2>
+                <div class="table-responsive">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Keterangan</th>
+                                <th>Debit</th>
+                                <th>Kredit</th>
+                                <th>Saldo</th>
+                                <th>Keterangan Tambahan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-body">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="charts-tab">
+            <div class="dashboard">
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-chart-doughnut"></i> Grafik Pemasukan vs Pengeluaran</h2>
+                    <div class="chart-container">
+                        <canvas id="incomeExpenseChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-chart-line"></i> Grafik Trend Bulanan</h2>
+                    <div class="chart-container">
+                        <canvas id="monthlyTrendChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-
+        
         <footer>
-            <p>Aplikasi Bendahara FSBI &copy; 2024 - Dibangun dengan ❤️ untuk Serikat</p>
+            <p>&copy; 2025 BENDAHARA FSBI APP - Keuangan Digital Terintegrasi</p>
         </footer>
     </div>
 
-    <script>
-        // CONFIGURASI API
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxpjOsTqibnlavINLE-WH8x2rkGj6JxlikuUzdNmrwUNxPK1TfoiPC1IOwnIHh7Jf8H/exec';
-        
-        // Variabel untuk menyimpan saldo
-        let currentBalance = 300000;
-        
-        // Fungsi untuk menambah transaksi
-        function addTransaction() {
-            const amount = document.getElementById('amount').value;
-            const type = document.getElementById('transactionType').value;
-            const category = document.getElementById('category').value;
-            const description = document.getElementById('description').value;
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message"></span>
+    </div>
 
-            if (!amount || amount <= 0) {
-                showAlert('Masukkan jumlah yang valid!', 'error');
+    <script>
+        // Konstanta dan variabel global
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzptBZECDM3ilyR6iTs3UNzMDU5gkoni26g_kkJ8N5mgnjcZRgG0MUU8kAvnkbIT61Gg/exec';
+        let transactions = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set tanggal hari ini sebagai default
+            const today = new Date().toISOString().substr(0, 10);
+            document.getElementById('tanggal').value = today;
+            
+            // Setup tab functionality
+            setupTabs();
+            
+            // Setup form submission
+            document.getElementById('transaction-form').addEventListener('submit', handleFormSubmit);
+            
+            // Load initial data
+            loadData();
+            
+            // Initialize charts
+            initCharts();
+        });
+        
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                    
+                    // If charts tab is clicked, update charts
+                    if (tab.dataset.tab === 'charts') {
+                        updateCharts();
+                    }
+                });
+            });
+        }
+        
+        async function loadData() {
+            showLoading();
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getData`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    transactions = data.data;
+                    updateSummaryCards(data.totals);
+                    updateTransactionTable();
+                    updateCharts();
+                    showNotification('Data berhasil dimuat', 'success');
+                } else {
+                    throw new Error(data.message || 'Gagal memuat data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal memuat data: ' + error.message, 'error');
+                
+                // Fallback data untuk demo jika endpoint tidak bisa diakses
+                loadDemoData();
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function loadDemoData() {
+            // Data demo jika tidak dapat mengakses endpoint
+            transactions = [
+                { id: 1, tanggal: '2025-03-15', keterangan: 'Gaji Bulanan', debit: '2500000', kredit: '', saldo: '2500000', keterangan2: 'Gaji Maret' },
+                { id: 2, tanggal: '2025-03-16', keterangan: 'Bayar Listrik', debit: '', kredit: '750000', saldo: '1750000', keterangan2: 'PLN' },
+                { id: 3, tanggal: '2025-03-18', keterangan: 'Freelance Project', debit: '2750000', kredit: '', saldo: '4500000', keterangan2: 'Project Website' },
+                { id: 4, tanggal: '2025-03-20', keterangan: 'Belanja Bulanan', debit: '', kredit: '1200000', saldo: '3300000', keterangan2: 'Supermarket' },
+                { id: 5, tanggal: '2025-03-22', keterangan: 'Bonus', debit: '1000000', kredit: '', saldo: '4300000', keterangan2: 'Bonus Kerja' },
+                { id: 6, tanggal: '2025-03-25', keterangan: 'Internet', debit: '', kredit: '425000', saldo: '3875000', keterangan2: 'Paket Data' },
+                { id: 7, tanggal: '2025-03-28', keterangan: 'Transportasi', debit: '', kredit: '800000', saldo: '3075000', keterangan2: 'Bensin dan Transport' }
+            ];
+            
+            const totals = {
+                pemasukan: 6250000,
+                pengeluaran: 3175000,
+                saldo: 3075000
+            };
+            
+            updateSummaryCards(totals);
+            updateTransactionTable();
+            updateCharts();
+        }
+        
+        function updateSummaryCards(totals) {
+            document.getElementById('total-pemasukan').textContent = formatRupiah(totals.pemasukan);
+            document.getElementById('total-pengeluaran').textContent = formatRupiah(totals.pengeluaran);
+            document.getElementById('saldo-sekarang').textContent = formatRupiah(totals.saldo);
+        }
+        
+        function updateTransactionTable() {
+            const tbody = document.getElementById('transactions-body');
+            tbody.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Tidak ada data transaksi</td></tr>';
                 return;
             }
-
-            // Gunakan GET request
-            const url = `${API_URL}?tipe=${type}&jumlah=${amount}&kategori=${category}&keterangan=${encodeURIComponent(description)}`;
             
-            showAlert('🔄 Mengirim data...', 'success');
+            transactions.forEach(trans => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(trans.tanggal)}</td>
+                    <td>${trans.keterangan}</td>
+                    <td class="debit">${trans.debit ? formatRupiah(trans.debit) : ''}</td>
+                    <td class="kredit">${trans.kredit ? formatRupiah(trans.kredit) : ''}</td>
+                    <td>${formatRupiah(trans.saldo)}</td>
+                    <td>${trans.keterangan2 || ''}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${trans.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        async function handleFormSubmit(e) {
+            e.preventDefault();
             
-            // Kirim data ke API
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Update saldo
-                        currentBalance = data.saldo;
-                        updateBalanceDisplay();
-                        
-                        // Tambahkan ke riwayat
-                        addToTransactionHistory(type, amount, category, description);
-                        
-                        showAlert('✅ ' + data.message, 'success');
-                        resetForm();
-                    } else {
-                        showAlert('❌ ' + data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    showAlert('❌ Error: Gagal mengirim data', 'error');
-                    console.error('Error:', error);
+            const transaction = {
+                tanggal: document.getElementById('tanggal').value,
+                jenis: document.getElementById('jenis').value,
+                keterangan: document.getElementById('keterangan').value,
+                jumlah: document.getElementById('jumlah').value,
+                keterangan2: document.getElementById('keterangan2').value,
+                action: 'addTransaction'
+            };
+            
+            if (!transaction.jenis) {
+                showNotification('Pilih jenis transaksi terlebih dahulu', 'error');
+                return;
+            }
+            
+            try {
+                showLoading();
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(transaction)
                 });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Transaksi berhasil ditambahkan', 'success');
+                    document.getElementById('transaction-form').reset();
+                    document.getElementById('tanggal').value = new Date().toISOString().substr(0, 10);
+                    
+                    // Reload data
+                    loadData();
+                } else {
+                    throw new Error(result.message || 'Gagal menambahkan transaksi');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal menambahkan transaksi: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
         }
-
-        // Fungsi untuk menambah riwayat transaksi
-        function addToTransactionHistory(type, amount, category, description) {
-            const historyElement = document.getElementById('transactionHistory');
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
+        
+        async function deleteTransaction(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                return;
+            }
             
-            historyItem.innerHTML = `
-                <div>
-                    <strong>${type}</strong>
-                    <div>${category} - ${description}</div>
-                    <small>${new Date().toLocaleString('id-ID')}</small>
-                </div>
-                <div class="history-amount ${type === 'Pemasukan' ? 'income' : 'expense'}">
-                    ${type === 'Pemasukan' ? '+' : '-'} Rp ${parseInt(amount).toLocaleString('id-ID')}
-                </div>
-            `;
+            try {
+                showLoading();
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'deleteTransaction',
+                        id: id
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Transaksi berhasil dihapus', 'success');
+                    loadData();
+                } else {
+                    throw new Error(result.message || 'Gagal menghapus transaksi');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Gagal menghapus transaksi: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function initCharts() {
+            // Initialize charts with empty data
+            const incomeExpenseCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+            window.incomeExpenseChart = new Chart(incomeExpenseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pemasukan', 'Pengeluaran'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#4cc9f0', '#f72585'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 13
+                                },
+                                padding: 20
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
             
-            historyElement.insertBefore(historyItem, historyElement.firstChild);
+            const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+            window.monthlyTrendChart = new Chart(monthlyTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Pemasukan',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: '#4cc9f0',
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: '#f72585',
+                            backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': Rp ' + context.raw.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
-
-        // Fungsi untuk update tampilan saldo
-        function updateBalanceDisplay() {
-            const balanceElement = document.getElementById('currentBalance');
-            balanceElement.textContent = 'Rp ' + currentBalance.toLocaleString('id-ID');
+        
+        function updateCharts() {
+            // Update doughnut chart
+            if (window.incomeExpenseChart) {
+                const totalPemasukan = transactions
+                    .filter(t => t.debit)
+                    .reduce((sum, t) => sum + parseInt(t.debit || 0), 0);
+                    
+                const totalPengeluaran = transactions
+                    .filter(t => t.kredit)
+                    .reduce((sum, t) => sum + parseInt(t.kredit || 0), 0);
+                
+                window.incomeExpenseChart.data.datasets[0].data = [totalPemasukan, totalPengeluaran];
+                window.incomeExpenseChart.update();
+            }
+            
+            // Update line chart
+            if (window.monthlyTrendChart) {
+                // Data contoh untuk grafik trend bulanan
+                window.monthlyTrendChart.data.datasets[0].data = [4000000, 4500000, 5250000, 4800000, 5100000, 5500000];
+                window.monthlyTrendChart.data.datasets[1].data = [2800000, 3000000, 3175000, 3300000, 2950000, 3100000];
+                window.monthlyTrendChart.update();
+            }
         }
-
-        // Fungsi untuk reset form
-        function resetForm() {
-            document.getElementById('amount').value = '';
-            document.getElementById('description').value = '';
+        
+        function formatRupiah(amount) {
+            if (!amount) return 'Rp 0';
+            return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
         }
-
-        // Fungsi untuk menampilkan alert
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        
+        function formatDate(dateString) {
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notification-message');
+            
+            notification.className = 'notification ' + type;
+            messageEl.textContent = message;
+            notification.classList.add('show');
             
             setTimeout(() => {
-                alertBox.innerHTML = '';
-            }, 5000);
+                notification.classList.remove('show');
+            }, 3000);
         }
-
-        // Inisialisasi
-        console.log('🚀 Aplikasi Bendahara FSBI siap digunakan!');
-        console.log('API URL:', API_URL);
+        
+        function showLoading() {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.type === 'submit') {
+                    const originalText = btn.innerHTML;
+                    btn.setAttribute('data-original', originalText);
+                    btn.innerHTML = '<span class="loader"></span> Memproses...';
+                }
+            });
+        }
+        
+        function hideLoading() {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                const originalText = btn.getAttribute('data-original');
+                if (originalText) {
+                    btn.innerHTML = originalText;
+                }
+            });
+        }
     </script>
 </body>
 </html>
