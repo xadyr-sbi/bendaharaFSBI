@@ -47,142 +47,696 @@
             text-align: center;
         }
         
-        .header-title {
-            font-size: 2em;
+        .logo {
+            font-size: 2.5em;
             margin-bottom: 10px;
         }
         
+        .header-title {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        
+        .header-subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
         .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
         }
         
         .card {
             background: white;
             border-radius: 10px;
             padding: 20px;
-            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        
+        .saldo-container {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
+        .saldo-amount {
+            font-size: 2.8em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .saldo-label {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.2);
+        }
+        
         button {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), var(--primary));
             color: white;
             border: none;
             padding: 15px 25px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
-            margin: 10px 0;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
-        .result {
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #b0b0b0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .alert {
             padding: 15px;
-            background: #e8f5e8;
             border-radius: 8px;
             margin: 10px 0;
+            text-align: center;
+            font-weight: 500;
         }
         
-        .error {
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
             background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-hijau { background: var(--success); }
+        .status-kuning { background: var(--warning); }
+        .status-merah { background: var(--danger); }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .saldo-awal-section {
+            text-align: center;
+            padding: 30px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin: 20px;
+        }
+        
+        .saldo-input {
+            max-width: 300px;
+            margin: 0 auto 20px;
+        }
+        
+        .unlock-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .unlock-link:hover {
+            text-decoration: underline;
+        }
+        
+        .password-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .transaction-history {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        
+        .history-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-amount {
+            font-weight: 600;
+        }
+        
+        .history-amount.income {
+            color: var(--success);
+        }
+        
+        .history-amount.expense {
+            color: var(--danger);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+        
+        .test-section {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="header-title">💰 Aplikasi Bendahara FSBI</h1>
-            <p>Deployed via Vercel</p>
+            <div class="logo">💰</div>
+            <h1 class="header-title">Aplikasi Bendahara FSBI</h1>
+            <p class="header-subtitle">Sistem Keuangan Digital terintegrasi</p>
         </header>
+
+        <div class="saldo-container">
+            <div class="saldo-label">SALDO SAAT INI</div>
+            <div class="saldo-amount" id="currentBalance">Rp 0</div>
+            <div id="saldoStatus">
+                <span class="status-indicator status-hijau"></span>
+                <span>Status: Aman</span>
+            </div>
+        </div>
+
+        <div id="saldoAwalSection" class="saldo-awal-section">
+            <h2>🔐 Set Saldo Awal</h2>
+            <p>Masukkan saldo awal untuk memulai pencatatan keuangan</p>
+            <div class="saldo-input">
+                <input type="number" id="initialBalance" placeholder="Masukkan jumlah saldo awal" min="0">
+            </div>
+            <button onclick="setSaldoAwal()">Kunci Saldo Awal</button>
+            
+            <div id="unlockSection" class="password-section hidden">
+                <div class="form-group">
+                    <label for="unlockPassword">Password:</label>
+                    <input type="password" id="unlockPassword" placeholder="Masukkan password">
+                </div>
+                <button onclick="unlockSaldoAwal()">Buka Kunci</button>
+            </div>
+            
+            <a class="unlock-link" id="unlockLink" onclick="showUnlockForm()">🔓 Klik untuk mengubah saldo awal</a>
+        </div>
 
         <div class="main-content">
             <div class="card">
-                <h2>Test Koneksi API</h2>
-                <button onclick="testConnection()">🔗 Test Koneksi ke Google Sheets</button>
-                <div id="result" class="result"></div>
+                <h2 class="card-title">💸 Transaksi Baru</h2>
+                <div id="alertBox"></div>
+                
+                <div class="test-section">
+                    <strong>API URL:</strong> 
+                    <code id="apiUrl">https://script.google.com/macros/s/AKfycbydhx4zrBmjBwhPBVg3PaYqwaTQK4wA5yyTLM64sLpApZdMJWaPJ_yt2YapCTcXaSZs/exec</code>
+                    <button onclick="testConnection()" style="background: #2196f3; margin-top: 10px;">🧪 Test Koneksi API</button>
+                    <div id="testResult"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="transactionType">Jenis Transaksi</label>
+                    <select id="transactionType">
+                        <option value="Pemasukan">Pemasukan</option>
+                        <option value="Pengeluaran">Pengeluaran</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Jumlah (Rp)</label>
+                    <input type="number" id="amount" placeholder="Masukkan jumlah" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Kategori</label>
+                    <select id="category">
+                        <option value="Iuran">Iuran Anggota</option>
+                        <option value="Donasi">Donasi</option>
+                        <option value="Proyek">Proyek</option>
+                        <option value="Sumbangan">Sumbangan</option>
+                        <option value="Operasional">Operasional</option>
+                        <option value="Acara">Acara</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Keterangan</label>
+                    <textarea id="description" rows="3" placeholder="Deskripsi transaksi"></textarea>
+                </div>
+
+                <button onclick="addTransaction()">➕ Tambah Transaksi</button>
             </div>
-            
+
             <div class="card">
-                <h2>Test Tambah Transaksi</h2>
-                <button onclick="testTransaction()">💸 Test Tambah Transaksi</button>
-                <div id="transactionResult" class="result"></div>
+                <h2 class="card-title">📊 Grafik Keuangan</h2>
+                <div class="chart-container">
+                    <canvas id="financeChart"></canvas>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3>Status Bulanan</h3>
+                    <div id="monthlyStatus">
+                        <span class="status-indicator status-hijau"></span>
+                        <span>Menunggu data...</span>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="transaction-history">
+            <h2 class="history-title">📋 Riwayat Transaksi Terbaru</h2>
+            <div id="transactionHistory">
+                <p style="text-align: center; padding: 20px; color: #777;">Belum ada transaksi</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Aplikasi Bendahara FSBI &copy; 2025 - Dibangun dengan ❤️ untuk Serikat</p>
+        </footer>
     </div>
 
     <script>
+        // CONFIGURATION - URL API ANDA
         const API_URL = 'https://script.google.com/macros/s/AKfycbydhx4zrBmjBwhPBVg3PaYqwaTQK4wA5yyTLM64sLpApZdMJWaPJ_yt2YapCTcXaSZs/exec';
+        const UNLOCK_PASSWORD = 'Serdadu123';
         
-        // Fungsi untuk kirim data ke Google Apps Script
-        async function sendToGoogleAppsScript(data) {
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error:', error);
-                return { status: 'error', message: error.message };
-            }
-        }
+        // Variabel global
+        let currentBalance = 0;
+        let saldoAwalTerkunci = false;
+        let financeChart = null;
+        let transactions = [];
 
-        // Test koneksi
-        async function testConnection() {
-            const resultElement = document.getElementById('result');
-            resultElement.innerHTML = '🔄 Testing connection...';
-            
-            const result = await sendToGoogleAppsScript({
-                tipe: 'Pemasukan',
-                jumlah: '1000',
-                kategori: 'Test',
-                keterangan: 'Test connection from Vercel'
-            });
-            
-            if (result.status === 'success') {
-                resultElement.innerHTML = `✅ <strong>Connection Successful!</strong><br>
-                Message: ${result.message}<br>
-                Saldo: Rp ${result.saldo.toLocaleString('id-ID')}`;
-                resultElement.classList.remove('error');
-            } else {
-                resultElement.innerHTML = `❌ <strong>Connection Failed!</strong><br>
-                Error: ${result.message}`;
-                resultElement.classList.add('error');
-            }
-        }
-
-        // Test transaksi
-        async function testTransaction() {
-            const resultElement = document.getElementById('transactionResult');
-            resultElement.innerHTML = '🔄 Mengirim transaksi...';
-            
-            const result = await sendToGoogleAppsScript({
-                tipe: 'Pemasukan',
-                jumlah: '50000',
-                kategori: 'Iuran',
-                keterangan: 'Test transaksi dari Vercel'
-            });
-            
-            if (result.status === 'success') {
-                resultElement.innerHTML = `✅ <strong>Transaksi Berhasil!</strong><br>
-                Message: ${result.message}<br>
-                Saldo Baru: Rp ${result.saldo.toLocaleString('id-ID')}`;
-                resultElement.classList.remove('error');
-            } else {
-                resultElement.innerHTML = `❌ <strong>Transaksi Gagal!</strong><br>
-                Error: ${result.message}`;
-                resultElement.classList.add('error');
-            }
-        }
-
-        // Auto test saat page load
-        window.addEventListener('load', function() {
+        // Inisialisasi aplikasi
+        function initApp() {
+            checkSaldoAwalStatus();
+            updateBalanceDisplay();
+            initChart();
+            loadTransactionHistory();
             console.log('🚀 Aplikasi Bendahara FSBI loaded');
             console.log('API URL:', API_URL);
-        });
+        }
+
+        // Test koneksi API
+        async function testConnection() {
+            const testResult = document.getElementById('testResult');
+            testResult.innerHTML = '<div class="alert">🔄 Testing koneksi API...</div>';
+            
+            try {
+                // Test dengan GET request dulu
+                const testUrl = API_URL + '?test=connection&timestamp=' + Date.now();
+                const response = await fetch(testUrl);
+                
+                if (response.ok) {
+                    testResult.innerHTML = '<div class="alert alert-success">✅ Koneksi API BERHASIL! Server merespons dengan baik.</div>';
+                } else {
+                    testResult.innerHTML = '<div class="alert alert-error">❌ Koneksi API GAGAL! Status: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                testResult.innerHTML = '<div class="alert alert-error">❌ Error: ' + error.message + '</div>';
+                console.error('Connection test error:', error);
+            }
+        }
+
+        // Cek status saldo awal dari localStorage
+        function checkSaldoAwalStatus() {
+            if (localStorage.getItem('saldoAwal')) {
+                saldoAwalTerkunci = true;
+                document.getElementById('saldoAwalSection').classList.add('hidden');
+                currentBalance = parseFloat(localStorage.getItem('saldoAwal'));
+                updateBalanceDisplay();
+            }
+        }
+
+        // Tampilkan form unlock
+        function showUnlockForm() {
+            document.getElementById('unlockSection').classList.remove('hidden');
+            document.getElementById('unlockLink').classList.add('hidden');
+        }
+
+        // Buka kunci saldo awal
+        function unlockSaldoAwal() {
+            const password = document.getElementById('unlockPassword').value;
+            
+            if (password !== UNLOCK_PASSWORD) {
+                showAlert('Password salah!', 'error');
+                return;
+            }
+            
+            // Reset status saldo awal
+            saldoAwalTerkunci = false;
+            localStorage.removeItem('saldoAwal');
+            document.getElementById('saldoAwalSection').classList.remove('hidden');
+            document.getElementById('unlockSection').classList.add('hidden');
+            document.getElementById('unlockLink').classList.add('hidden');
+            document.getElementById('initialBalance').value = '';
+            
+            showAlert('Saldo awal telah dibuka kuncinya. Silakan set ulang.', 'success');
+        }
+
+        // Set saldo awal
+        async function setSaldoAwal() {
+            const initialBalance = document.getElementById('initialBalance').value;
+            
+            if (!initialBalance || initialBalance <= 0) {
+                showAlert('Masukkan jumlah saldo awal yang valid!', 'error');
+                return;
+            }
+
+            const data = {
+                tipe: 'Saldo Awal',
+                jumlah: initialBalance,
+                kategori: 'Setup',
+                keterangan: 'Saldo awal aplikasi'
+            };
+
+            await sendToGoogleAppsScript(data, true);
+        }
+
+        // Tambah transaksi baru
+        async function addTransaction() {
+            if (!saldoAwalTerkunci) {
+                showAlert('Harap set saldo awal terlebih dahulu!', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('amount').value;
+            const type = document.getElementById('transactionType').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+
+            if (!amount || amount <= 0) {
+                showAlert('Masukkan jumlah yang valid!', 'error');
+                return;
+            }
+
+            const data = {
+                tipe: type,
+                jumlah: amount,
+                kategori: category,
+                keterangan: description
+            };
+
+            await sendToGoogleAppsScript(data);
+        }
+
+        // Kirim data ke Google Apps Script dengan error handling
+        async function sendToGoogleAppsScript(data, isSaldoAwal = false) {
+            try {
+                showAlert('Mengirim data...', 'success');
+                
+                // Gunakan GET request sebagai fallback jika POST bermasalah
+                if (isSaldoAwal) {
+                    // Untuk saldo awal, gunakan GET untuk menghindari CORS issues
+                    const getUrl = `${API_URL}?tipe=${encodeURIComponent(data.tipe)}&jumlah=${encodeURIComponent(data.jumlah)}&kategori=${encodeURIComponent(data.kategori)}&keterangan=${encodeURIComponent(data.keterangan)}`;
+                    
+                    const response = await fetch(getUrl);
+                    const result = await response.json();
+                    processResult(result, data, isSaldoAwal);
+                } else {
+                    // Untuk transaksi biasa, coba POST dulu
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        const result = await response.json();
+                        processResult(result, data, isSaldoAwal);
+                    } catch (postError) {
+                        console.log('POST failed, trying GET fallback:', postError);
+                        // Fallback ke GET jika POST gagal
+                        const getUrl = `${API_URL}?tipe=${encodeURIComponent(data.tipe)}&jumlah=${encodeURIComponent(data.jumlah)}&kategori=${encodeURIComponent(data.kategori)}&keterangan=${encodeURIComponent(data.keterangan)}`;
+                        
+                        const getResponse = await fetch(getUrl);
+                        const getResult = await getResponse.json();
+                        processResult(getResult, data, isSaldoAwal);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error: Gagal mengirim data. ' + error.message, 'error');
+            }
+        }
+
+        // Process hasil response
+        function processResult(result, data, isSaldoAwal) {
+            if (result.status === 'success') {
+                showAlert(result.message, 'success');
+                
+                if (isSaldoAwal) {
+                    saldoAwalTerkunci = true;
+                    localStorage.setItem('saldoAwal', data.jumlah);
+                    document.getElementById('saldoAwalSection').classList.add('hidden');
+                    currentBalance = parseFloat(data.jumlah);
+                } else {
+                    currentBalance = result.saldo;
+                    addToTransactionHistory({
+                        type: data.tipe,
+                        amount: data.jumlah,
+                        category: data.kategori,
+                        description: data.keterangan,
+                        timestamp: new Date().toLocaleString('id-ID')
+                    });
+                }
+                
+                updateBalanceDisplay();
+                resetForm();
+                updateChart();
+            } else {
+                showAlert(result.message, 'error');
+            }
+        }
+
+        // Tambahkan ke riwayat transaksi
+        function addToTransactionHistory(transaction) {
+            transactions.unshift(transaction);
+            if (transactions.length > 5) {
+                transactions = transactions.slice(0, 5);
+            }
+            renderTransactionHistory();
+            saveTransactionHistory();
+        }
+
+        // Render riwayat transaksi
+        function renderTransactionHistory() {
+            const historyElement = document.getElementById('transactionHistory');
+            
+            if (transactions.length === 0) {
+                historyElement.innerHTML = '<p style="text-align: center; padding: 20px; color: #777;">Belum ada transaksi</p>';
+                return;
+            }
+            
+            historyElement.innerHTML = transactions.map(transaction => `
+                <div class="history-item">
+                    <div>
+                        <strong>${transaction.type}</strong>
+                        <div>${transaction.category} - ${transaction.description}</div>
+                        <small>${transaction.timestamp}</small>
+                    </div>
+                    <div class="history-amount ${transaction.type === 'Pemasukan' ? 'income' : 'expense'}">
+                        ${transaction.type === 'Pemasukan' ? '+' : '-'} Rp ${parseInt(transaction.amount).toLocaleString('id-ID')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load riwayat transaksi
+        function loadTransactionHistory() {
+            const savedTransactions = localStorage.getItem('transactions');
+            if (savedTransactions) {
+                transactions = JSON.parse(savedTransactions);
+                renderTransactionHistory();
+            }
+        }
+
+        // Simpan riwayat transaksi
+        function saveTransactionHistory() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        // Update tampilan saldo
+        function updateBalanceDisplay() {
+            const balanceElement = document.getElementById('currentBalance');
+            balanceElement.textContent = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(currentBalance);
+            updateBalanceStatus();
+        }
+
+        // Update status saldo
+        function updateBalanceStatus() {
+            const statusElement = document.getElementById('saldoStatus');
+            if (currentBalance <= 0) {
+                statusElement.innerHTML = '<span class="status-indicator status-merah"></span><span>Status: Bahaya - Saldo negatif</span>';
+            } else if (currentBalance < 500000) {
+                statusElement.innerHTML = '<span class="status-indicator status-kuning"></span><span>Status: Waspada - Saldo rendah</span>';
+            } else {
+                statusElement.innerHTML = '<span class="status-indicator status-hijau"></span><span>Status: Aman</span>';
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+        }
+
+        // Tampilkan alert
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                alertBox.innerHTML = '';
+            }, 3000);
+        }
+
+        // Inisialisasi chart
+        function initChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            financeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                    datasets: [{
+                        label: 'Pemasukan',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#2ecc71'
+                    }, {
+                        label: 'Pengeluaran',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Grafik Keuangan Bulanan'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update chart
+        function updateChart() {
+            financeChart.data.datasets[0].data = [1500000, 1200000, 1800000, 900000, 2100000, 1500000];
+            financeChart.data.datasets[1].data = [1100000, 900000, 1300000, 800000, 1200000, 1100000];
+            financeChart.update();
+        }
+
+        // Jalankan aplikasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
