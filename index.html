@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pencatatan Keuangan</title>
+    <title>Sistem Pencatatan Keuangan fsbi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,10 +19,15 @@
             background-color: #f5f8ff;
             color: #333;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
         }
         
-        .navbar {
+        .header {
             background: linear-gradient(120deg, #4361ee, #3a0ca3);
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
         
         .card {
@@ -30,6 +35,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: none;
             transition: transform 0.3s;
+            margin-bottom: 20px;
         }
         
         .card:hover {
@@ -75,10 +81,6 @@
             background-color: #f8f9fa;
         }
         
-        #chart-container {
-            height: 300px;
-        }
-        
         .stats-icon {
             font-size: 2.5rem;
             opacity: 0.8;
@@ -92,31 +94,27 @@
         .section-title {
             border-left: 4px solid var(--primary);
             padding-left: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: #4361ee;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-wallet me-2"></i> Sistem Keuangan
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="refresh-data">
-                            <i class="fas fa-sync-alt me-1"></i> Refresh Data
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <div class="container">
+        <div class="header text-center">
+            <h1><i class="fas fa-wallet me-2"></i> Sistem Pencatatan Keuangan</h1>
+            <p class="mb-0">Manajemen Pemasukan dan Pengeluaran</p>
         </div>
-    </nav>
 
-    <div class="container mb-5">
         <div class="row mb-4">
             <div class="col-md-4 mb-3">
                 <div class="card balance-card p-3">
@@ -161,33 +159,51 @@
 
         <div class="row">
             <div class="col-lg-8">
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-body">
-                        <h5 class="section-title mb-4">Riwayat Transaksi</h5>
+                        <h5 class="section-title">Riwayat Transaksi</h5>
                         <div class="d-flex justify-content-between mb-3">
                             <div class="btn-group">
                                 <button class="btn btn-outline-primary active" data-filter="all">Semua</button>
                                 <button class="btn btn-outline-primary" data-filter="pemasukan">Pemasukan</button>
                                 <button class="btn btn-outline-primary" data-filter="pengeluaran">Pengeluaran</button>
                             </div>
-                            <input type="text" class="form-control w-50" placeholder="Cari transaksi..." id="search-input">
+                            <button class="btn btn-primary" id="refresh-data">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh Data
+                            </button>
                         </div>
-                        <div id="transaction-list">
-                            <div class="text-center py-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Memuat data...</span>
-                                </div>
-                                <p class="mt-2">Memuat data transaksi</p>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Jenis Transaksi</th>
+                                        <th>Debit</th>
+                                        <th>Kredit</th>
+                                        <th>Saldo</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Memuat data...</span>
+                                            </div>
+                                            <p class="mt-2">Memuat data transaksi</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-body">
-                        <h5 class="section-title mb-4">Tambah Transaksi</h5>
+                        <h5 class="section-title">Tambah Transaksi</h5>
                         <form id="transaction-form">
                             <div class="mb-3">
                                 <label for="jenis" class="form-label">Jenis Transaksi</label>
@@ -209,15 +225,6 @@
                                 <i class="fas fa-plus-circle me-1"></i> Tambah Transaksi
                             </button>
                         </form>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="section-title mb-4">Statistik</h5>
-                        <div id="chart-container">
-                            <p class="text-center">Grafik akan ditampilkan di sini</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -248,7 +255,7 @@
         function formatTanggal(tanggal) {
             const options = { 
                 day: '2-digit', 
-                month: 'long', 
+                month: 'short', 
                 year: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -259,6 +266,17 @@
         // Ambil data dari Google Sheets
         async function fetchData() {
             try {
+                document.getElementById('transaction-table').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Memuat data...</span>
+                            </div>
+                            <p class="mt-2">Memuat data transaksi</p>
+                        </td>
+                    </tr>
+                `;
+                
                 const response = await fetch(ENDPOINT_URL);
                 if (!response.ok) throw new Error('Gagal mengambil data');
                 
@@ -267,10 +285,14 @@
                 renderTransactions(transactions);
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('transaction-list').innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i> Gagal memuat data: ${error.message}
-                    </div>
+                document.getElementById('transaction-table').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i> Gagal memuat data: ${error.message}
+                            </div>
+                        </td>
+                    </tr>
                 `;
             }
         }
@@ -281,15 +303,21 @@
             totalExpense = 0;
             
             data.forEach(transaction => {
-                if (transaction.Debit) {
-                    totalIncome += Number(transaction.Debit);
+                // Menggunakan nama properti sesuai dengan header di spreadsheet
+                if (transaction.debit && transaction.debit !== "") {
+                    totalIncome += Number(transaction.debit);
                 }
-                if (transaction.Kredit) {
-                    totalExpense += Number(transaction.Kredit);
+                if (transaction.kredit && transaction.kredit !== "") {
+                    totalExpense += Number(transaction.kredit);
                 }
             });
             
-            currentBalance = totalIncome - totalExpense;
+            // Ambil saldo terakhir dari transaksi terakhir
+            if (data.length > 0) {
+                currentBalance = Number(data[data.length - 1].saldo);
+            } else {
+                currentBalance = 0;
+            }
             
             // Update UI dengan data yang telah diproses
             document.getElementById('current-balance').textContent = formatRupiah(currentBalance);
@@ -297,44 +325,41 @@
             document.getElementById('total-expense').textContent = formatRupiah(totalExpense);
         }
         
-        // Render daftar transaksi
+        // Render daftar transaksi dalam tabel
         function renderTransactions(data) {
-            const transactionList = document.getElementById('transaction-list');
+            const transactionTable = document.getElementById('transaction-table');
             
             if (data.length === 0) {
-                transactionList.innerHTML = `
-                    <div class="text-center py-4">
-                        <i class="fas fa-receipt fa-3x mb-3 text-muted"></i>
-                        <p class="text-muted">Tidak ada transaksi</p>
-                    </div>
+                transactionTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-receipt fa-3x mb-3 text-muted"></i>
+                            <p class="text-muted">Tidak ada transaksi</p>
+                        </td>
+                    </tr>
                 `;
                 return;
             }
             
             let html = '';
             data.forEach(transaction => {
-                const isIncome = transaction.Jenis.toLowerCase() === 'pemasukan';
-                const amount = isIncome ? transaction.Debit : transaction.Kredit;
+                // Menggunakan nama properti sesuai dengan header di spreadsheet
+                const jenis = transaction['jenis transaksi'] || '';
+                const isIncome = jenis.toLowerCase() === 'pemasukan';
                 
                 html += `
-                    <div class="transaction-item ${isIncome ? 'income' : 'expense'} p-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">${transaction.Keterangan || '-'}</h6>
-                                <small class="text-muted">${formatTanggal(transaction.Tanggal)}</small>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold ${isIncome ? 'income-color' : 'expense-color'}">
-                                    ${isIncome ? '+' : '-'} ${formatRupiah(amount)}
-                                </div>
-                                <small class="badge ${isIncome ? 'bg-success' : 'bg-danger'}">${transaction.Jenis}</small>
-                            </div>
-                        </div>
-                    </div>
+                    <tr class="${isIncome ? 'income' : 'expense'}">
+                        <td>${formatTanggal(transaction.tanggal)}</td>
+                        <td><span class="badge ${isIncome ? 'bg-success' : 'bg-danger'}">${jenis}</span></td>
+                        <td class="income-color">${transaction.debit ? formatRupiah(transaction.debit) : '-'}</td>
+                        <td class="expense-color">${transaction.kredit ? formatRupiah(transaction.kredit) : '-'}</td>
+                        <td><strong>${formatRupiah(transaction.saldo)}</strong></td>
+                        <td>${transaction.keterangan || '-'}</td>
+                    </tr>
                 `;
             });
             
-            transactionList.innerHTML = html;
+            transactionTable.innerHTML = html;
         }
         
         // Kirim data transaksi baru
@@ -391,34 +416,6 @@
             }
         }
         
-        // Filter transaksi
-        function filterTransactions(filter) {
-            let filteredData = transactions;
-            
-            if (filter !== 'all') {
-                filteredData = transactions.filter(
-                    transaction => transaction.Jenis.toLowerCase() === filter
-                );
-            }
-            
-            renderTransactions(filteredData);
-        }
-        
-        // Cari transaksi
-        function searchTransactions(keyword) {
-            if (!keyword) {
-                renderTransactions(transactions);
-                return;
-            }
-            
-            const filteredData = transactions.filter(transaction => 
-                transaction.Keterangan.toLowerCase().includes(keyword.toLowerCase()) ||
-                transaction.Jenis.toLowerCase().includes(keyword.toLowerCase())
-            );
-            
-            renderTransactions(filteredData);
-        }
-        
         // Inisialisasi event listeners saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
             // Ambil data saat halaman dimuat
@@ -435,13 +432,17 @@
                     });
                     this.classList.add('active');
                     
-                    filterTransactions(this.getAttribute('data-filter'));
+                    const filter = this.getAttribute('data-filter');
+                    let filteredData = transactions;
+                    
+                    if (filter !== 'all') {
+                        filteredData = transactions.filter(
+                            transaction => transaction['jenis transaksi'].toLowerCase() === filter
+                        );
+                    }
+                    
+                    renderTransactions(filteredData);
                 });
-            });
-            
-            // Event listener untuk pencarian
-            document.getElementById('search-input').addEventListener('input', function() {
-                searchTransactions(this.value);
             });
             
             // Event listener untuk refresh data
