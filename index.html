@@ -1,162 +1,455 @@
-<script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzptBZECDM3ilyR6iTs3UNzMDU5gkoni26g_kkJ8N5mgnjcZRgG0MUU8kAvnkbIT61Gg/exec';
-    let transactions = [];
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const today = new Date().toISOString().substr(0, 10);
-        document.getElementById('tanggal').value = today;
-        setupTabs();
-        document.getElementById('transaction-form').addEventListener('submit', handleFormSubmit);
-        loadData();
-        initCharts();
-    });
-
-    function setupTabs() {
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-                if(tab.dataset.tab === 'charts') updateCharts();
-                else if(tab.dataset.tab === 'data') loadData();
-            });
-        });
-    }
-
-    async function loadData() {
-        try {
-            const response = await fetch(SCRIPT_URL);
-            const data = await response.json();
-            const headers = data.headers;
-            const rows = data.rows;
-            transactions = rows.map((row, index) => ({
-                id: index,
-                tanggal: row[0],
-                keterangan: row[1],
-                debit: row[2],
-                kredit: row[3],
-                saldo: row[4],
-                keterangan2: row[5]
-            }));
-
-            const totalPemasukan = transactions.reduce((sum, t) => sum + (t.keterangan === 'Pemasukan' ? t.debit : 0), 0);
-            const totalPengeluaran = transactions.reduce((sum, t) => sum + (t.keterangan === 'Pengeluaran' ? t.kredit : 0), 0);
-            const saldoSekarang = transactions.length ? transactions[transactions.length-1].saldo : 0;
-
-            updateSummaryCards({pemasukan: totalPemasukan, pengeluaran: totalPengeluaran, saldo: saldoSekarang});
-            updateTransactionTable();
-            updateCharts();
-        } catch(err) {
-            console.error(err);
-            showNotification('Gagal memuat data', 'error');
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pencatatan Keuangan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --success: #06d6a0;
+            --danger: #ef476f;
+            --light: #f8f9fa;
+            --dark: #212529;
         }
-    }
-
-    function updateSummaryCards(totals) {
-        document.getElementById('total-pemasukan').textContent = formatRupiah(totals.pemasukan);
-        document.getElementById('total-pengeluaran').textContent = formatRupiah(totals.pengeluaran);
-        document.getElementById('saldo-sekarang').textContent = formatRupiah(totals.saldo);
-    }
-
-    function updateTransactionTable() {
-        const tbody = document.getElementById('transactions-body');
-        tbody.innerHTML = '';
-        if(transactions.length === 0){
-            tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>Belum ada data transaksi</p></td></tr>`;
-            return;
+        
+        body {
+            background-color: #f5f8ff;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        transactions.forEach(t => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${formatDate(t.tanggal)}</td>
-                <td>${t.keterangan}</td>
-                <td class="debit">${t.keterangan === 'Pemasukan' ? formatRupiah(t.debit) : ''}</td>
-                <td class="kredit">${t.keterangan === 'Pengeluaran' ? formatRupiah(t.kredit) : ''}</td>
-                <td>${formatRupiah(t.saldo)}</td>
-                <td>${t.keterangan2 || ''}</td>
-                <td>-</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    async function handleFormSubmit(e){
-        e.preventDefault();
-        const tanggal = document.getElementById('tanggal').value;
-        const keterangan = document.getElementById('keterangan').value;
-        const jumlah = document.getElementById('jumlah').value || 0;
-        const keterangan2 = document.getElementById('keterangan2').value;
-
-        if(!keterangan) return showNotification('Pilih jenis transaksi terlebih dahulu', 'error');
-
-        const payload = {
-            tanggal: tanggal,
-            keterangan: keterangan,
-            debit: keterangan==='Pemasukan'? jumlah : 0,
-            kredit: keterangan==='Pengeluaran'? jumlah : 0,
-            ket2: keterangan2
-        };
-
-        try {
-            showLoading();
-            const formData = new URLSearchParams(payload);
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            showNotification(result.message || 'Transaksi berhasil ditambahkan', 'success');
-            document.getElementById('transaction-form').reset();
-            document.getElementById('tanggal').value = new Date().toISOString().substr(0, 10);
-            loadData();
-        } catch(err){
-            console.error(err);
-            showNotification('Gagal menambahkan transaksi', 'error');
-        } finally {
-            hideLoading();
+        
+        .navbar {
+            background: linear-gradient(120deg, #4361ee, #3a0ca3);
         }
-    }
+        
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: none;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .balance-card {
+            background: linear-gradient(120deg, #4361ee, #3a0ca3);
+            color: white;
+        }
+        
+        .income-color {
+            color: var(--success);
+        }
+        
+        .expense-color {
+            color: var(--danger);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a0ca3;
+        }
+        
+        .transaction-item {
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .transaction-item.income {
+            border-left-color: var(--success);
+        }
+        
+        .transaction-item.expense {
+            border-left-color: var(--danger);
+        }
+        
+        .transaction-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        #chart-container {
+            height: 300px;
+        }
+        
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .section-title {
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-wallet me-2"></i> Sistem Keuangan
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="refresh-data">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh Data
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    function formatRupiah(amount){
-        return 'Rp ' + parseInt(amount || 0).toLocaleString('id-ID');
-    }
+    <div class="container mb-5">
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card balance-card p-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1">Saldo Saat Ini</h6>
+                                <h2 class="card-title mb-0" id="current-balance">Rp 0</h2>
+                            </div>
+                            <i class="fas fa-wallet stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-white p-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-muted">Total Pemasukan</h6>
+                                <h2 class="card-title mb-0 income-color" id="total-income">Rp 0</h2>
+                            </div>
+                            <i class="fas fa-arrow-down stats-icon income-color"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-white p-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-muted">Total Pengeluaran</h6>
+                                <h2 class="card-title mb-0 expense-color" id="total-expense">Rp 0</h2>
+                            </div>
+                            <i class="fas fa-arrow-up stats-icon expense-color"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    function formatDate(dateStr){
-        return new Date(dateStr).toLocaleDateString('id-ID');
-    }
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="section-title mb-4">Riwayat Transaksi</h5>
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary active" data-filter="all">Semua</button>
+                                <button class="btn btn-outline-primary" data-filter="pemasukan">Pemasukan</button>
+                                <button class="btn btn-outline-primary" data-filter="pengeluaran">Pengeluaran</button>
+                            </div>
+                            <input type="text" class="form-control w-50" placeholder="Cari transaksi..." id="search-input">
+                        </div>
+                        <div id="transaction-list">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Memuat data...</span>
+                                </div>
+                                <p class="mt-2">Memuat data transaksi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    function showNotification(message, type){
-        const notif = document.getElementById('notification');
-        const msg = document.getElementById('notification-message');
-        notif.className = 'notification ' + type + ' show';
-        msg.textContent = message;
-        setTimeout(()=> notif.classList.remove('show'), 3000);
-    }
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="section-title mb-4">Tambah Transaksi</h5>
+                        <form id="transaction-form">
+                            <div class="mb-3">
+                                <label for="jenis" class="form-label">Jenis Transaksi</label>
+                                <select class="form-select" id="jenis" required>
+                                    <option value="">Pilih Jenis</option>
+                                    <option value="pemasukan">Pemasukan</option>
+                                    <option value="pengeluaran">Pengeluaran</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="jumlah" class="form-label">Jumlah (Rp)</label>
+                                <input type="number" class="form-control" id="jumlah" placeholder="0" min="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="keterangan" class="form-label">Keterangan</label>
+                                <textarea class="form-control" id="keterangan" rows="2" placeholder="Deskripsi transaksi" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus-circle me-1"></i> Tambah Transaksi
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-    function showLoading(){
-        document.querySelectorAll('button').forEach(btn=>{
-            btn.disabled=true;
-            if(btn.type==='submit'){
-                btn.setAttribute('data-original', btn.innerHTML);
-                btn.innerHTML='<span class="loader"></span> Memproses...';
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="section-title mb-4">Statistik</h5>
+                        <div id="chart-container">
+                            <p class="text-center">Grafik akan ditampilkan di sini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL endpoint Google Apps Script
+        const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzHsSXp-G31FvHwi5LYex0PXRYvj0nkx9OiL5D6nJN0Ac-8wh5kOLtYx4L3KhQst2ZP8Q/exec";
+        
+        // Variabel global untuk menyimpan data
+        let transactions = [];
+        let currentBalance = 0;
+        let totalIncome = 0;
+        let totalExpense = 0;
+        
+        // Format angka ke Rupiah
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
+        }
+        
+        // Format tanggal
+        function formatTanggal(tanggal) {
+            const options = { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(tanggal).toLocaleDateString('id-ID', options);
+        }
+        
+        // Ambil data dari Google Sheets
+        async function fetchData() {
+            try {
+                const response = await fetch(ENDPOINT_URL);
+                if (!response.ok) throw new Error('Gagal mengambil data');
+                
+                transactions = await response.json();
+                processData(transactions);
+                renderTransactions(transactions);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('transaction-list').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i> Gagal memuat data: ${error.message}
+                    </div>
+                `;
             }
+        }
+        
+        // Proses data untuk menghitung saldo, pemasukan, dan pengeluaran
+        function processData(data) {
+            totalIncome = 0;
+            totalExpense = 0;
+            
+            data.forEach(transaction => {
+                if (transaction.Debit) {
+                    totalIncome += Number(transaction.Debit);
+                }
+                if (transaction.Kredit) {
+                    totalExpense += Number(transaction.Kredit);
+                }
+            });
+            
+            currentBalance = totalIncome - totalExpense;
+            
+            // Update UI dengan data yang telah diproses
+            document.getElementById('current-balance').textContent = formatRupiah(currentBalance);
+            document.getElementById('total-income').textContent = formatRupiah(totalIncome);
+            document.getElementById('total-expense').textContent = formatRupiah(totalExpense);
+        }
+        
+        // Render daftar transaksi
+        function renderTransactions(data) {
+            const transactionList = document.getElementById('transaction-list');
+            
+            if (data.length === 0) {
+                transactionList.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-receipt fa-3x mb-3 text-muted"></i>
+                        <p class="text-muted">Tidak ada transaksi</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            data.forEach(transaction => {
+                const isIncome = transaction.Jenis.toLowerCase() === 'pemasukan';
+                const amount = isIncome ? transaction.Debit : transaction.Kredit;
+                
+                html += `
+                    <div class="transaction-item ${isIncome ? 'income' : 'expense'} p-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${transaction.Keterangan || '-'}</h6>
+                                <small class="text-muted">${formatTanggal(transaction.Tanggal)}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold ${isIncome ? 'income-color' : 'expense-color'}">
+                                    ${isIncome ? '+' : '-'} ${formatRupiah(amount)}
+                                </div>
+                                <small class="badge ${isIncome ? 'bg-success' : 'bg-danger'}">${transaction.Jenis}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            transactionList.innerHTML = html;
+        }
+        
+        // Kirim data transaksi baru
+        async function addTransaction(e) {
+            e.preventDefault();
+            
+            const jenis = document.getElementById('jenis').value;
+            const jumlah = document.getElementById('jumlah').value;
+            const keterangan = document.getElementById('keterangan').value;
+            
+            if (!jenis || !jumlah || !keterangan) {
+                alert('Harap isi semua field!');
+                return;
+            }
+            
+            const button = document.querySelector('#transaction-form button[type="submit"]');
+            const originalText = button.innerHTML;
+            
+            // Ubah tampilan button saat loading
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+            
+            try {
+                const formData = new URLSearchParams();
+                formData.append('jenis', jenis);
+                formData.append('jumlah', jumlah);
+                formData.append('keterangan', keterangan);
+                
+                const response = await fetch(ENDPOINT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error('Gagal menambah transaksi');
+                
+                const result = await response.json();
+                
+                // Reset form
+                document.getElementById('transaction-form').reset();
+                
+                // Tampilkan pesan sukses
+                alert('Transaksi berhasil ditambahkan! Saldo baru: ' + formatRupiah(result.saldo));
+                
+                // Refresh data
+                fetchData();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal menambah transaksi: ' + error.message);
+            } finally {
+                // Kembalikan tampilan button ke semula
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        }
+        
+        // Filter transaksi
+        function filterTransactions(filter) {
+            let filteredData = transactions;
+            
+            if (filter !== 'all') {
+                filteredData = transactions.filter(
+                    transaction => transaction.Jenis.toLowerCase() === filter
+                );
+            }
+            
+            renderTransactions(filteredData);
+        }
+        
+        // Cari transaksi
+        function searchTransactions(keyword) {
+            if (!keyword) {
+                renderTransactions(transactions);
+                return;
+            }
+            
+            const filteredData = transactions.filter(transaction => 
+                transaction.Keterangan.toLowerCase().includes(keyword.toLowerCase()) ||
+                transaction.Jenis.toLowerCase().includes(keyword.toLowerCase())
+            );
+            
+            renderTransactions(filteredData);
+        }
+        
+        // Inisialisasi event listeners saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ambil data saat halaman dimuat
+            fetchData();
+            
+            // Event listener untuk form
+            document.getElementById('transaction-form').addEventListener('submit', addTransaction);
+            
+            // Event listener untuk filter
+            document.querySelectorAll('[data-filter]').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('[data-filter]').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    filterTransactions(this.getAttribute('data-filter'));
+                });
+            });
+            
+            // Event listener untuk pencarian
+            document.getElementById('search-input').addEventListener('input', function() {
+                searchTransactions(this.value);
+            });
+            
+            // Event listener untuk refresh data
+            document.getElementById('refresh-data').addEventListener('click', function(e) {
+                e.preventDefault();
+                fetchData();
+            });
         });
-    }
-
-    function hideLoading(){
-        document.querySelectorAll('button').forEach(btn=>{
-            btn.disabled=false;
-            const original = btn.getAttribute('data-original');
-            if(original) btn.innerHTML=original;
-        });
-    }
-
-    function initCharts(){
-        // Charts tetap seperti sebelumnya, bisa pakai data dummy awal
-    }
-
-    function updateCharts(){
-        // Update chart pakai data transactions
-    }
-</script>
+    </script>
+</body>
+</html>
